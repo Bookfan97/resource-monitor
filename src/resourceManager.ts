@@ -1,6 +1,7 @@
 import {cpuInfo, memoryInfo, refreshCpu, refreshMemory, disks} from "tauri-plugin-system-info-api";
 import { info, error } from '@tauri-apps/plugin-log';
 import { platform } from '@tauri-apps/plugin-os';
+import { emit } from '@tauri-apps/api/event';
 const POLLING_INTERVAL = 500;
 const currentPlatform = platform();
 
@@ -9,11 +10,12 @@ export function pollResources() {
         const cpuUsage = await getCpuUsage();
         const ramUsage = await getRAMUsage();
         const storageData = await getStorageData();
-        const staticData = await getStaticData();
-        info(`CPU usage: ${cpuUsage}%`);
-        info(`RAM usage: ${ramUsage}%`);
-        info(`Storage usage: ${storageData.usage * 100}%`);
-        info(`System Info: CPU Model - ${staticData.cpuModel}, Total Storage - ${staticData.totalStorage} GB, Total Memory - ${staticData.totalMemoryGB} GB`);
+        const statistics: Statistics = {
+            cpuUsage,
+            ramUsage,
+            storageUsage: storageData.usage * 100,
+        };
+        emit('statistics', statistics);
     }, POLLING_INTERVAL);
     return () => clearInterval(interval);
 }
