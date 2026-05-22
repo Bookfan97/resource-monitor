@@ -16,6 +16,7 @@
     "@tauri-apps/plugin-os": "~2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "recharts": "^3.8.1",
     "tauri-plugin-system-info-api": "^2.0.10"
   },
   "devDependencies": {
