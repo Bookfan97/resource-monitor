@@ -18,19 +18,19 @@ export function BaseChart(props: BaseChartProps) {
     return (
         <ResponsiveContainer width={'100%'} height={'100%'}>
             <AreaChart data={props.data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                {!props.hideGrid && <CartesianGrid stroke="#333" strokeDasharray="5 5" fill="#1C1C1C" />}
+                {!props.hideGrid && <CartesianGrid stroke="#333" fill="#1C1C1C" />}
+                <YAxis domain={[0, 100]} hide />
+                <XAxis dataKey="value" hide />
                 <Area
-                    fillOpacity={0.3}
+                    fillOpacity={0.2}
                     fill={props.fill}
                     stroke={props.stroke}
-                    strokeWidth={3}
-                    type="monotone"
+                    strokeWidth={1.5}
+                    type="linear"
                     dataKey="value"
                     isAnimationActive={false}
                     connectNulls
                 />
-                <XAxis hide />
-                <YAxis domain={[0, 100]} hide />
             </AreaChart>
         </ResponsiveContainer>
     );
