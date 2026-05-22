@@ -95,6 +95,80 @@ button {
   margin-right: 5px;
 }
 
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header {
+  height: 30px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px;
+}
+
+.main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  overflow: hidden;
+}
+
+.mainGrid {
+  height: 100%;
+  width: 100%;
+}
+
+.selectOption {
+  display: block;
+  width: 100%;
+  height: 100px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+.selectOption:hover {
+  background: #333;
+}
+
+.selectOptionTitle {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8em;
+  margin-bottom: 5px;
+}
+
+.selectOptionChart {
+  height: 50px;
+  width: 100%;
+}
+
+header button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: 8px;
+  padding: 0;
+  border: none;
+}
+
+#close {
+  background-color: #ff5f56;
+}
+
+#minimize {
+  background-color: #ffbd2e;
+}
+
+#maximize {
+  background-color: #27c93f;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;
