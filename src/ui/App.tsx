@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import './App.css';
 import { useStatistics } from './useStatistics';
 import { Chart } from './Chart';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { getStaticData } from '../resourceManager';
 import { listen } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { cn } from '../lib/utils';
+import { Card, CardContent } from '../components/ui/card';
 
 function App() {
   const staticData = useStaticData();
@@ -34,7 +35,7 @@ function App() {
   }, [activeView, cpuUsages, ramUsages, storageUsages]);
 
   useEffect(() => {
-    const unlistenPromise = listen<View>('changeView', (event) => setActiveView(event.payload));
+    const unlistenPromise = getCurrentWindow().listen<View>('changeView', (event) => setActiveView(event.payload));
     return () => {
         unlistenPromise.then(unlisten => unlisten());
     };
@@ -44,9 +45,9 @@ function App() {
   const cpuModelShort = staticData?.cpuModel.split(' @')[0] ?? '';
 
   return (
-      <div className="App">
-        <div className="main">
-          <div className="sidebar">
+      <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans">
+        <div className="flex flex-1 overflow-hidden">
+          <div className="w-[280px] bg-sidebar border-r border-sidebar-border overflow-y-auto">
             <SelectOption
                 onClick={() => setActiveView('CPU')}
                 title="CPU"
@@ -60,7 +61,7 @@ function App() {
                 title="Memory"
                 view="RAM"
                 isActive={activeView === 'RAM'}
-                subTitle={`${(latestStats.ramUsage * (staticData?.totalMemoryGB ?? 16) / 100).toFixed(1)}/${staticData?.totalMemoryGB ?? 16} GB (${latestStats.ramUsage}%)`}
+                subTitle={`${(latestStats.ramUsage * (staticData?.totalMemoryGB ?? 16) / 100).toFixed(1)}/${staticData?.totalMemoryGB ?? 16} GB (${Math.round(latestStats.ramUsage)}%)`}
                 data={ramUsages}
             />
             <SelectOption
@@ -72,46 +73,46 @@ function App() {
                 data={storageUsages}
             />
           </div>
-          <div className="mainGrid">
-            <div className="viewHeader">
-                <h2>{activeView === 'RAM' ? 'Memory' : activeView === 'STORAGE' ? 'Disk 0 (C:)' : activeView}</h2>
-                <div style={{ color: '#aaa', fontSize: '1.2em' }}>{activeView === 'CPU' ? cpuModelShort : ''}</div>
+          <div className="flex-1 p-6 flex flex-col gap-5 overflow-y-auto">
+            <div className="flex justify-between items-start">
+                <h2 className="text-2xl font-normal">{activeView === 'RAM' ? 'Memory' : activeView === 'STORAGE' ? 'Disk 0 (C:)' : activeView}</h2>
+                <div className="text-muted-foreground text-xl">{activeView === 'CPU' ? cpuModelShort : ''}</div>
             </div>
-            <div className="mainChartContainer">
-                <div style={{ position: 'absolute', top: 5, right: 10, color: '#aaa', fontSize: '0.8em', zIndex: 10 }}>% Utilization</div>
+            <div className="h-[300px] w-full bg-[#1c1c1c] border border-[#333] relative">
+                <div className="absolute top-1.5 right-2.5 text-muted-foreground text-xs z-10">% Utilization</div>
                 <Chart
                     selectedView={activeView}
                     data={activeUsages}
                     maxDataPoints={60}
                 />
             </div>
-            <div className="statsGrid">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
                 {activeView === 'CPU' && (
                     <>
                         <StatItem label="Utilization" value={`${latestStats.cpuUsage}%`} />
-                        <StatItem label="Speed" value="3.40 GHz" />
-                        <StatItem label="Processes" value="245" />
-                        <StatItem label="Threads" value="3210" />
-                        <StatItem label="Handles" value="124500" />
-                        <StatItem label="Up time" value="0:12:45:22" />
+                        <StatItem label="Speed" value={`${latestStats.cpuSpeed ?? '3.40'} GHz`} />
+                        <StatItem label="Processes" value={(latestStats.processes ?? 0).toString()} />
+                        <StatItem label="Threads" value={(latestStats.threads ?? 0).toString()} />
+                        <StatItem label="Handles" value={(latestStats.handles ?? 0).toString()} />
+                        <StatItem label="Up time" value={latestStats.uptime ?? '0:00:00:00'} />
                     </>
                 )}
                 {activeView === 'RAM' && (
                     <>
                         <StatItem label="In use (Compressed)" value={`${(latestStats.ramUsage * (staticData?.totalMemoryGB ?? 16) / 100).toFixed(1)} GB (120 MB)`} />
                         <StatItem label="Available" value={`${((100 - latestStats.ramUsage) * (staticData?.totalMemoryGB ?? 16) / 100).toFixed(1)} GB`} />
-                        <StatItem label="Committed" value="18.5/32.0 GB" />
-                        <StatItem label="Cached" value="4.2 GB" />
-                        <StatItem label="Paged pool" value="640 MB" />
-                        <StatItem label="Non-paged pool" value="320 MB" />
+                        <StatItem label="Committed" value={latestStats.ramCommitted ?? '0.0/0.0 GB'} />
+                        <StatItem label="Cached" value={latestStats.ramCached ?? '0.0 GB'} />
+                        <StatItem label="Paged pool" value={latestStats.ramPaged ?? '0 MB'} />
+                        <StatItem label="Non-paged pool" value={latestStats.ramNonPaged ?? '0 MB'} />
                     </>
                 )}
                 {activeView === 'STORAGE' && (
                     <>
                         <StatItem label="Active time" value={`${latestStats.storageUsage}%`} />
-                        <StatItem label="Average response time" value="0.5 ms" />
-                        <StatItem label="Read speed" value="0 KB/s" />
-                        <StatItem label="Write speed" value="124 KB/s" />
+                        <StatItem label="Average response time" value={latestStats.storageResponseTime ?? '0.0 ms'} />
+                        <StatItem label="Read speed" value={latestStats.storageReadSpeed ?? '0 KB/s'} />
+                        <StatItem label="Write speed" value={latestStats.storageWriteSpeed ?? '0 KB/s'} />
                         <StatItem label="Capacity" value={`${staticData?.totalStorage ?? 512} GB`} />
                         <StatItem label="Formatted" value={`${staticData?.totalStorage ?? 512} GB`} />
                     </>
@@ -125,9 +126,9 @@ function App() {
 
 function StatItem({ label, value }: { label: string; value: string }) {
     return (
-        <div className="statItem">
-            <span className="statLabel">{label}</span>
-            <span className="statValue">{value}</span>
+        <div className="flex flex-col">
+            <span className="text-sm text-muted-foreground">{label}</span>
+            <span className="text-2xl font-light">{value}</span>
         </div>
     );
 }
@@ -141,12 +142,18 @@ function SelectOption(props: {
   onClick: () => void;
 }) {
   return (
-      <button className={`selectOption ${props.isActive ? 'active' : ''}`} onClick={props.onClick}>
-        <div className="selectOptionTitle">
-          <div className="title">{props.title}</div>
-          <div className="subtitle">{props.subTitle}</div>
+      <button 
+        className={cn(
+            "flex w-full h-20 bg-transparent border-none rounded-none px-4 text-left cursor-pointer transition-colors items-center gap-3",
+            props.isActive ? "bg-[#4d4d4d] border-l-4 border-accent pl-3" : "hover:bg-[#3d3d3d]"
+        )} 
+        onClick={props.onClick}
+      >
+        <div className="flex-1 flex flex-col">
+          <div className="font-semibold text-lg leading-tight">{props.title}</div>
+          <div className="text-sm text-muted-foreground">{props.subTitle}</div>
         </div>
-        <div className="selectOptionChart">
+        <div className="w-20 h-10">
           <Chart selectedView={props.view} data={props.data} maxDataPoints={60} hideGrid />
         </div>
       </button>
@@ -158,7 +165,13 @@ function useStaticData() {
 
   useEffect(() => {
     (async () => {
-      setStaticData(await getStaticData());
+      try {
+        const data = await getStaticData();
+        console.log("Static data received:", data);
+        setStaticData(data);
+      } catch (e) {
+        console.error("Error fetching static data:", e);
+      }
     })();
   }, []);
 

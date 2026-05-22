@@ -10,11 +10,9 @@
     "opener:default",
     "os:default",
     "system-info:default",
-    "system-info:allow-refresh-cpu",
-    "system-info:allow-cpu-info",
-    "system-info:allow-refresh-memory",
-    "system-info:allow-memory-info",
-    "system-info:allow-disks",
-    "log:default"
+    "system-info:allow-all",
+    "log:default",
+    "core:event:allow-emit",
+    "core:event:allow-listen"
   ]
 }

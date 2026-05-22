@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 export function useStatistics(dataPointCount: number): Statistics[] {
     const [value, setValue] = useState<Statistics[]>([]);
 
     useEffect(() => {
-        const unlistenPromise = listen<Statistics>('statistics', (event) =>
+        console.log("Setting up statistics listener");
+        const unlistenPromise = getCurrentWindow().listen<Statistics>('statistics', (event) => {
+            console.log("Received statistics event:", event.payload);
             setValue((prev) => {
                 const newData = [...prev, event.payload];
 
@@ -14,8 +17,8 @@ export function useStatistics(dataPointCount: number): Statistics[] {
                 }
 
                 return newData;
-            })
-        );
+            });
+        });
         return () => {
             unlistenPromise.then(unlisten => unlisten());
         };
