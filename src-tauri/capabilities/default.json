@@ -8,6 +8,10 @@
   "permissions": [
     "core:default",
     "opener:default",
-    "os:default"
+    "os:default",
+    "system-info:default",
+    "system-info:allow-refresh-cpu",
+    "system-info:allow-cpu-info",
+    "log:default"
   ]
 }
