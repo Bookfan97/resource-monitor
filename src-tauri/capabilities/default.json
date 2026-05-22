@@ -12,6 +12,8 @@
     "system-info:default",
     "system-info:allow-refresh-cpu",
     "system-info:allow-cpu-info",
+    "system-info:allow-refresh-memory",
+    "system-info:allow-memory-info",
     "log:default"
   ]
 }
