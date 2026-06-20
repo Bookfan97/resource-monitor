@@ -10,7 +10,10 @@
     "opener:default",
     "os:default",
     "system-info:default",
-    "system-info:allow-all",
+    "system-info:allow-get-cpu-info",
+    "system-info:allow-get-cpu-usage",
+    "system-info:allow-get-memory-info",
+    "system-info:allow-get-disk-info",
     "log:default",
     "core:event:allow-emit",
     "core:event:allow-listen"

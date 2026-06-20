@@ -1,7 +1,6 @@
 import {cpuInfo, memoryInfo, refreshCpu, refreshMemory, disks, uptime} from "tauri-plugin-system-info-api";
 import { info, error } from '@tauri-apps/plugin-log';
 import { platform } from '@tauri-apps/plugin-os';
-import { emit } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { isTauri } from '@tauri-apps/api/core';
 const POLLING_INTERVAL = 1000;
@@ -107,10 +106,18 @@ async function getStorageData() {
         if (mainDisk) {
             const total = mainDisk.total_space;
             const free = mainDisk.available_space;
-            return {
-                total: Math.floor(total / (1024 * 1024 * 1024)),
-                usage: 1 - free / total,
-            };
+
+            if (Number.isFinite(total) && total > 0 && Number.isFinite(free)) {
+                return {
+                    total: Math.floor(total / (1024 * 1024 * 1024)),
+                    usage: 1 - free / total,
+                };
+            } else {
+                return {
+                    total: 0,
+                    usage: 0,
+                };
+            }
         }
     } catch (e) {
         error(`Error getting storage data: ${e instanceof Error ? e.message : String(e)}`);

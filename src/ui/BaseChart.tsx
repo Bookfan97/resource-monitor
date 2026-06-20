@@ -20,7 +20,7 @@ export function BaseChart(props: BaseChartProps) {
             <AreaChart data={props.data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                 {!props.hideGrid && <CartesianGrid stroke="#333" fill="#1C1C1C" />}
                 <YAxis domain={[0, 100]} hide />
-                <XAxis dataKey="value" hide />
+                <XAxis hide />
                 <Area
                     fillOpacity={0.2}
                     fill={props.fill}

@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useStatistics } from './useStatistics';
 import { Chart } from './Chart';
 import { getStaticData } from '../resourceManager';
-import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { isTauri } from '@tauri-apps/api/core';
 import { cn } from '../lib/utils';
-import { Card, CardContent } from '../components/ui/card';
 
 function App() {
   const staticData = useStaticData();
@@ -31,11 +30,22 @@ function App() {
         return ramUsages;
       case 'STORAGE':
         return storageUsages;
+      default:
+        return [];
     }
   }, [activeView, cpuUsages, ramUsages, storageUsages]);
 
   useEffect(() => {
-    const unlistenPromise = getCurrentWindow().listen<View>('changeView', (event) => setActiveView(event.payload));
+    if (!isTauri()) {
+      return () => {};
+    }
+
+    const unlistenPromise = getCurrentWindow().listen<View>('changeView', (event) => {
+      const payload = event.payload;
+      if (payload === 'CPU' || payload === 'RAM' || payload === 'STORAGE') {
+        setActiveView(payload);
+      }
+    });
     return () => {
         unlistenPromise.then(unlisten => unlisten());
     };
